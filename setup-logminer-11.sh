@@ -3,7 +3,7 @@
 mkdir /u01/app/oracle/oradata/recovery_area
 
 # Set archive log mode and enable GG replication
-ORACLE_SID=XE
+ORACLE_SID=ORCLCDB
 export ORACLE_SID
 sqlplus /nolog <<- EOF
 	CONNECT sys/top_secret AS SYSDBA
