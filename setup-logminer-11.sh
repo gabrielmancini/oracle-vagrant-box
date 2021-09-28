@@ -19,19 +19,19 @@ sqlplus /nolog <<- EOF
 EOF
 
 # Enable LogMiner required database features/settings
-sqlplus sys/top_secret@//localhost:1521/XE as sysdba <<- EOF
+sqlplus sys/top_secret@//localhost:1521/ORCLCDB as sysdba <<- EOF
   ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;
   ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED;
   exit;
 EOF
 
 # Create Log Miner Tablespace and User
-sqlplus sys/top_secret@//localhost:1521/XE as sysdba <<- EOF
-  CREATE TABLESPACE LOGMINER_TBS DATAFILE '/u01/app/oracle/oradata/XE/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
+sqlplus sys/top_secret@//localhost:1521/ORCLCDB as sysdba <<- EOF
+  CREATE TABLESPACE LOGMINER_TBS DATAFILE '/u01/app/oracle/oradata/ORCLCDB/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
   exit;
 EOF
 
-sqlplus sys/top_secret@//localhost:1521/XE as sysdba <<- EOF
+sqlplus sys/top_secret@//localhost:1521/ORCLCDB as sysdba <<- EOF
   CREATE USER dbzuser IDENTIFIED BY dbz DEFAULT TABLESPACE LOGMINER_TBS QUOTA UNLIMITED ON LOGMINER_TBS;
 
   GRANT CREATE SESSION TO dbzuser;
@@ -58,7 +58,7 @@ sqlplus sys/top_secret@//localhost:1521/XE as sysdba <<- EOF
   exit;
 EOF
 
-sqlplus sys/top_secret@//localhost:1521/XE as sysdba <<- EOF
+sqlplus sys/top_secret@//localhost:1521/ORCLCDB as sysdba <<- EOF
   CREATE USER debezium IDENTIFIED BY dbz DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
   GRANT CONNECT TO debezium;
   GRANT CREATE SESSION TO debezium;
