@@ -1,15 +1,12 @@
 #!/bin/sh
 
-mkdir /u01/app/oracle/oradata/recovery_area
-mkdir /u01/app/oracle/oradata/ORCLCDB
-
 # Set archive log mode and enable GG replication
 ORACLE_SID=ORCLCDB
 export ORACLE_SID
 sqlplus /nolog <<- EOF
-	CONNECT sys/top_secret AS SYSDBA
+	CONNECT sys/Oradoc_db1 AS SYSDBA
 	alter system set db_recovery_file_dest_size = 10G;
-	alter system set db_recovery_file_dest = '/u01/app/oracle/oradata/recovery_area' scope=spfile;
+	alter system set db_recovery_file_dest = '/u02/app/oracle/oradata/recovery_area' scope=spfile;
 	shutdown immediate
 	startup mount
 	alter database archivelog;
@@ -27,40 +24,47 @@ sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
 EOF
 
 # Create Log Miner Tablespace and User
-sqlplus sys/Oradoc_db1@ORCLPDB1 as sysdba <<- EOF
-  CREATE TABLESPACE LOGMINER_TBS DATAFILE '/u01/app/oracle/oradata/ORCLCDB/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
+sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
+  CREATE TABLESPACE LOGMINER_TBS DATAFILE '/u02/app/oracle/oradata/ORCLCDB/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
   exit;
 EOF
 
 sqlplus sys/Oradoc_db1@ORCLPDB1 as sysdba <<- EOF
-  CREATE USER dbzuser IDENTIFIED BY dbz DEFAULT TABLESPACE LOGMINER_TBS QUOTA UNLIMITED ON LOGMINER_TBS;
+  CREATE TABLESPACE LOGMINER_TBS DATAFILE '/u02/app/oracle/oradata/ORCLCDB/orclpdb1/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
+  exit;
+EOF
 
-  GRANT CREATE SESSION TO dbzuser;
-  GRANT SELECT ON V_\$DATABASE TO dbzuser;
-  GRANT FLASHBACK ANY TABLE TO dbzuser;
-  GRANT SELECT ANY TABLE TO dbzuser;
-  GRANT SELECT_CATALOG_ROLE TO dbzuser;
-  GRANT EXECUTE_CATALOG_ROLE TO dbzuser;
-  GRANT SELECT ANY TRANSACTION TO dbzuser;
-  GRANT SELECT ANY DICTIONARY TO dbzuser;
+sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
+  CREATE USER dbzuser IDENTIFIED BY dbz DEFAULT TABLESPACE LOGMINER_TBS QUOTA UNLIMITED ON LOGMINER_TBS CONTAINER=ALL;
 
-  GRANT CREATE TABLE TO dbzuser;
-  GRANT LOCK ANY TABLE TO dbzuser;
-  GRANT CREATE SEQUENCE TO dbzuser;
+  GRANT CREATE SESSION TO dbzuser CONTAINER=ALL;
+  GRANT SET CONTAINER TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ON V_\$DATABASE TO dbzuser CONTAINER=ALL;
+  GRANT FLASHBACK ANY TABLE TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ANY TABLE TO dbzuser CONTAINER=ALL;
+  GRANT SELECT_CATALOG_ROLE TO dbzuser CONTAINER=ALL;
+  GRANT EXECUTE_CATALOG_ROLE TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ANY TRANSACTION TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ANY DICTIONARY TO dbzuser CONTAINER=ALL;
+  GRANT LOGMINING TO dbzuser CONTAINER=ALL;
 
-  GRANT EXECUTE ON DBMS_LOGMNR TO dbzuser;
-  GRANT EXECUTE ON DBMS_LOGMNR_D TO dbzuser;
-  GRANT SELECT ON V_\$LOGMNR_LOGS to dbzuser;
-  GRANT SELECT ON V_\$LOGMNR_CONTENTS TO dbzuser;
-  GRANT SELECT ON V_\$LOGFILE TO dbzuser;
-  GRANT SELECT ON V_\$ARCHIVED_LOG TO dbzuser;
-  GRANT SELECT ON V_\$ARCHIVE_DEST_STATUS TO dbzuser;
+  GRANT CREATE TABLE TO dbzuser CONTAINER=ALL;
+  GRANT LOCK ANY TABLE TO dbzuser CONTAINER=ALL;
+  GRANT CREATE SEQUENCE TO dbzuser CONTAINER=ALL;
+
+  GRANT EXECUTE ON DBMS_LOGMNR TO dbzuser CONTAINER=ALL;
+  GRANT EXECUTE ON DBMS_LOGMNR_D TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ON V_\$LOGMNR_LOGS TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ON V_\$LOGMNR_CONTENTS TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ON V_\$LOGFILE TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ON V_\$ARCHIVED_LOG TO dbzuser CONTAINER=ALL;
+  GRANT SELECT ON V_\$ARCHIVE_DEST_STATUS TO dbzuser CONTAINER=ALL;
 
   exit;
 EOF
 
 sqlplus sys/Oradoc_db1@ORCLPDB1 as sysdba <<- EOF
-  CREATE USER debezium IDENTIFIED BY dbz DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
+  CREATE USER debezium IDENTIFIED BY dbz;
   GRANT CONNECT TO debezium;
   GRANT CREATE SESSION TO debezium;
   GRANT CREATE TABLE TO debezium;
