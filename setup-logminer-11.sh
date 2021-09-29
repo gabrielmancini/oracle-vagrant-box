@@ -27,12 +27,12 @@ sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
 EOF
 
 # Create Log Miner Tablespace and User
-sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
+sqlplus sys/Oradoc_db1@ORCLPDB1 as sysdba <<- EOF
   CREATE TABLESPACE LOGMINER_TBS DATAFILE '/u01/app/oracle/oradata/ORCLCDB/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
   exit;
 EOF
 
-sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
+sqlplus sys/Oradoc_db1@ORCLPDB1 as sysdba <<- EOF
   CREATE USER dbzuser IDENTIFIED BY dbz DEFAULT TABLESPACE LOGMINER_TBS QUOTA UNLIMITED ON LOGMINER_TBS;
 
   GRANT CREATE SESSION TO dbzuser;
@@ -59,7 +59,7 @@ sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
   exit;
 EOF
 
-sqlplus sys/Oradoc_db1@ORCLCDB as sysdba <<- EOF
+sqlplus sys/Oradoc_db1@ORCLPDB1 as sysdba <<- EOF
   CREATE USER debezium IDENTIFIED BY dbz DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
   GRANT CONNECT TO debezium;
   GRANT CREATE SESSION TO debezium;
